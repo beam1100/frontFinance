@@ -296,8 +296,8 @@ class macroFrame(tk.Frame):
             'startDay':start.strftime('%Y%m%d'),
             'endDay':end.strftime('%Y%m%d')
         }
-
-        url = "http://114.199.21.6:8000/test"
+# #####################################################################################################################################################
+        url = "http://114.199.21.6:8000/getfinance"
         # url = "http://127.0.0.1:8000/test"
         
         _res = requests.post(url, data=json.dumps(paramToServer), verify=False)
