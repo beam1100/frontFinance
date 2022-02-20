@@ -34,7 +34,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import os
-
+import pickle
 
 
 
@@ -52,7 +52,7 @@ class macroFrame(tk.Frame):
         self.selectedTree.column('c0', width=200, anchor=tk.CENTER)
         self.selectedTree.heading('c1', text='변화율?')
         self.selectedTree.column('c1', width=200, anchor=tk.CENTER)
-        self.selectedTree.grid(row=0, column=0, rowspan=6)
+        self.selectedTree.grid(row=0, column=0, rowspan=7)
         self.selectedTree.bind('<Button-3>', lambda event:self.rightClickEvent(event))
 
 
@@ -205,33 +205,60 @@ class macroFrame(tk.Frame):
         self.e.grid(row=3, column=7, sticky=tk.N)
         self.e.bind('<Return>',  lambda event:self.doubleClickEvent(event, 'krx'))
 
-        # 내 목록 가져오기
-        btnSaveList = tk.Button(self, text='리스트 저장하기', command=lambda:self.myList('save'))
-        btnSaveList.grid(row=4, column=1)
 
-        btnLoadList  = tk.Button(self, text='리스트 가져오기', command=lambda:self.myList('load'))
-        btnLoadList.grid(row=4, column=3)
+        # # 내 목록 가져오기
+        # btnSaveList = tk.Button(self, text='리스트 저장하기', command=lambda:self.myList('save'))
+        # btnSaveList.grid(row=4, column=1)
+
+        # btnLoadList  = tk.Button(self, text='리스트 가져오기', command=lambda:self.myList('load'))
+        # btnLoadList.grid(row=4, column=3)
         
-        btnDelList  = tk.Button(self, text='리스트 삭제', command=lambda:self.myList('del'))
-        btnDelList.grid(row=4, column=5)
+        # btnDelList  = tk.Button(self, text='리스트 삭제', command=lambda:self.myList('del'))
+        # btnDelList.grid(row=4, column=5)
 
-        # btnClearList  = tk.Button(self, text='리스트 테이블 드랍', command=lambda:self.myList('clear'))
-        # btnClearList.grid(row=4, column=4)
+        # # btnClearList  = tk.Button(self, text='리스트 테이블 드랍', command=lambda:self.myList('clear'))
+        # # btnClearList.grid(row=4, column=4)
 
 
-        # 기준 주기 설정
+
+
+
+        # 저장버튼
+        btnRun = tk.Button(self, text='가져오기', command=lambda:self.getData())
+        btnRun.grid(row=4, column=3, padx=1, pady=1)
+
+
+        # 기준 주기 콤보
         self.spList = [
             {'name':'원자료 주기', 'sp':None}, 
             {'name':'QQ(분기)', 'sp':'QQ'}, 
             {'name':'MM(월)', 'sp':'MM'},
             {'name':'DD(일)', 'sp':'DD'},
         ]
-        self.spCombo = myCombo.Combobox(self, height=0, values=[item['name'] for item in self.spList], state='readonly')
+        self.spCombo = myCombo.Combobox(self, height=0, width=20, values=[item['name'] for item in self.spList], state='readonly')
         self.spCombo.current(0)
-        self.spCombo.grid(row=5, column=1)
+        self.spCombo.grid(row=4, column=1, columnspan=2)
 
 
-        # 기능 선택 콤보상자
+
+
+
+        # 불러오기 버튼
+        btnRun = tk.Button(self, text='불러오기', command=lambda:self.loadData())
+        btnRun.grid(row=5, column=3, padx=1, pady=1)
+
+        self.picklePath = tk.Entry(self, width=20)
+        self.picklePath.grid(row=5, column=1, columnspan=2)
+
+
+
+
+        # 출력하기 버튼
+        btnRun = tk.Button(self, text='출력', command=lambda:self.printData())
+        btnRun.grid(row=6, column=3, padx=1, pady=1)
+
+
+        # 출력기능 콤보
         self.functionList = [
             {'name':'그래프출력', 'param':'graph'},
             {'name':'엑셀파일로 출력', 'param':'cor'},
@@ -240,21 +267,55 @@ class macroFrame(tk.Frame):
             {'name':'이동평균분석', 'param':'ma'},
             {'name':'볼린저밴드', 'param':'band'},
         ]
-
-        self.functioinCombo = myCombo.Combobox(self, height=0, values=[item['name'] for item in self.functionList], state='readonly')
+        self.functioinCombo = myCombo.Combobox(self, height=0, width=20, values=[item['name'] for item in self.functionList], state='readonly')
         self.functioinCombo.current(0)
-        self.functioinCombo.grid(row=5, column=3, padx=1)
-
-        # 실행버튼
-        btnRun = tk.Button(self, text='실행', command=lambda:self.getData())
-        btnRun.grid(row=5, column=5, padx=1, pady=1)
-
-        # # 테스트버튼
-        # btnRun = tk.Button(self, text='테스트', command=lambda:self._calculation())
-        # btnRun.grid(row=5, column=7, padx=1, pady=1)
+        self.functioinCombo.grid(row=6, column=1, columnspan=2)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # periodList = [] 
+        # for dict in macroFrame.selected:
+        #     if 'period' in dict.keys():
+        #         periodList.append(dict['period'])
+
+        # # 기준 주기 선택
+        # for item in self.spList:
+        #     if item['name'] == self.spCombo.get():
+        #         selectedSp = item['sp']
+
+        # if selectedSp:
+        #     sp = selectedSp
+        # else:
+        #     if 'QQ' in periodList:
+        #         sp = 'QQ'       #sp: standart Period
+        #     elif 'MM' in periodList:
+        #         sp = 'MM'
+        #     else:
+        #         sp = 'DD'
 
 
     def getData(self):
@@ -268,7 +329,7 @@ class macroFrame(tk.Frame):
 
         #현재 파일의 폴더 경로; 작업 파일 기준
         path2 = os.path.dirname(os.path.realpath(__file__))
-        print(path2+'\\pickles')
+
         #디렉토리 파일 리스트
         fileList = os.listdir(os.getcwd())
 
@@ -298,40 +359,45 @@ class macroFrame(tk.Frame):
 
 
 
-#         periodList = [] 
-#         for dict in macroFrame.selected:
-#             if 'period' in dict.keys():
-#                 periodList.append(dict['period'])
-
-#         # 기준 주기 선택
-#         for item in self.spList:
-#             if item['name'] == self.spCombo.get():
-#                 selectedSp = item['sp']
-
-#         if selectedSp:
-#             sp = selectedSp
-#         else:
-#             if 'QQ' in periodList:
-#                 sp = 'QQ'       #sp: standart Period
-#             elif 'MM' in periodList:
-#                 sp = 'MM'
-#             else:
-#                 sp = 'DD'
 
 
-#         # 기능 선택
-#         for item in self.functionList:
-#             if item['name'] == self.functioinCombo.get():
-#                 selectedCombo = item['param']
-#                 break
 
 
-#         #엑셀파일로 저장되는 기능은 파일경로 요청
-#         dir = None
-#         if selectedCombo == 'cor':
-#             dir = filedialog.asksaveasfile(mode='w', defaultextension=".xlsx")
-#             if dir == None:
-#                 return
+
+    def loadData(self):
+        value = filedialog.askopenfile(parent=self, initialdir='./pickles', title='저장된 피클 선택', filetypes=[('pickle', '.*')])
+        if value == None:
+            return
+        else:
+            self.picklePath.delete(0, tk.END)
+            self.picklePath.insert(0, value.name)
+
+
+
+
+
+
+
+
+
+    def printData(self):
+        _dfSum = open(self.picklePath.get(), 'rb')
+        dfSum = pickle.load(_dfSum)
+        print(dfSum)
+        
+        # # 기능 선택
+        # for item in self.functionList:
+        #     if item['name'] == self.functioinCombo.get():
+        #         selectedCombo = item['param']
+        #         break
+
+
+        # #엑셀파일로 저장되는 기능은 파일경로 요청
+        # dir = None
+        # if selectedCombo == 'cor':
+        #     dir = filedialog.asksaveasfile(mode='w', defaultextension=".xlsx")
+        #     if dir == None:
+        #         return
 
 #         start, end = self.getDate()
 
@@ -374,6 +440,10 @@ class macroFrame(tk.Frame):
 
 #         elif selectedCombo == 'cor':
 #             createExcel(dfSum, dir.name, 'cor')
+
+
+
+
 
 
 
@@ -494,39 +564,39 @@ class macroFrame(tk.Frame):
 
 
 
-    def myList(self, param):
+    # def myList(self, param):
         
-        with con:
-            cursor = con.cursor()
-            if param == 'save':
-                cursor.execute('delete from my_list')
-                con.commit()
-                for item in macroFrame.selected:
-                    sql = 'INSERT INTO my_list (dict) values(?)'
-                    _item = json.dumps(item)
-                    cursor.execute( sql, [(_item)])
-                    con.commit()
+    #     with con:
+    #         cursor = con.cursor()
+    #         if param == 'save':
+    #             cursor.execute('delete from my_list')
+    #             con.commit()
+    #             for item in macroFrame.selected:
+    #                 sql = 'INSERT INTO my_list (dict) values(?)'
+    #                 _item = json.dumps(item)
+    #                 cursor.execute( sql, [(_item)])
+    #                 con.commit()
 
-            elif param == 'load':
-                sql = 'SELECT * FROM my_list'
-                cursor.execute(sql)
-                results = cursor.fetchall()
-                selectedLoaded = []
-                for result in results:
-                    selectedLoaded.append(json.loads(result[1]))
-                macroFrame.selected = selectedLoaded
-                self.updateTree()
+    #         elif param == 'load':
+    #             sql = 'SELECT * FROM my_list'
+    #             cursor.execute(sql)
+    #             results = cursor.fetchall()
+    #             selectedLoaded = []
+    #             for result in results:
+    #                 selectedLoaded.append(json.loads(result[1]))
+    #             macroFrame.selected = selectedLoaded
+    #             self.updateTree()
                     
-            elif param == 'del':
-                sql = 'delete from my_list'
-                cursor.execute(sql)
-                con.commit()
-                print('my_list 모든 row 삭제됨')
+    #         elif param == 'del':
+    #             sql = 'delete from my_list'
+    #             cursor.execute(sql)
+    #             con.commit()
+    #             print('my_list 모든 row 삭제됨')
 
-            elif param == 'clear':
-                cursor.execute('DROP TABLE my_list')
-                con.commit()
-                print('my_list 테이블 드롭됨')
+    #         elif param == 'clear':
+    #             cursor.execute('DROP TABLE my_list')
+    #             con.commit()
+    #             print('my_list 테이블 드롭됨')
 
                     
 
