@@ -1,4 +1,4 @@
-from macro_organize import *
+from macro_print import *
 
 import tkinter as tk
 from tkinter import Scrollbar, ttk
@@ -8,15 +8,14 @@ from tkinter.constants import ANCHOR
 
 
 import calendar
-from datetime import date, datetime
+from datetime import datetime, date
+# from datetime import date, datetime
 from tkinter import filedialog
 import pandas as pd
-from pykrx import stock
+
 import copy
 import requests
 import json
-
-import clipboard
 
 today = date.today() #날짜 값만 필요
 lastDay = calendar.monthrange(today.year, today.month)[1]
@@ -35,6 +34,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import os
 import pickle
+
+
 
 
 
@@ -290,71 +291,70 @@ class macroFrame(tk.Frame):
 
 
 
-
-
-
-
-
-
-
-        # periodList = [] 
-        # for dict in macroFrame.selected:
-        #     if 'period' in dict.keys():
-        #         periodList.append(dict['period'])
-
-        # # 기준 주기 선택
-        # for item in self.spList:
-        #     if item['name'] == self.spCombo.get():
-        #         selectedSp = item['sp']
-
-        # if selectedSp:
-        #     sp = selectedSp
-        # else:
-        #     if 'QQ' in periodList:
-        #         sp = 'QQ'       #sp: standart Period
-        #     elif 'MM' in periodList:
-        #         sp = 'MM'
-        #     else:
-        #         sp = 'DD'
-
-
     def getData(self):
-        # print(json.dumps(macroFrame.selected))
+
+        # print(macroFrame.selected)
+
+        # 기준 주기 선택
+        periodList = [] 
+        for dict in macroFrame.selected:
+            if 'period' in dict.keys():
+                periodList.append(dict['period'])
+        for item in self.spList:
+            if item['name'] == self.spCombo.get():
+                selectedSp = item['sp']
+        if selectedSp:
+            sp = selectedSp
+        else:
+            if 'QQ' in periodList:
+                sp = 'QQ'       #sp: standart Period
+            elif 'MM' in periodList:
+                sp = 'MM'
+            else:
+                sp = 'DD'
 
         options = webdriver.ChromeOptions()
         options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
-        #현재 폴더 경로; 작업 폴더 기준
-        path1 = os.getcwd()
+        # path = os.getcwd()   #현재 폴더 경로; 작업 폴더 기준
+        # fileList = os.listdir(os.getcwd())    #디렉토리 파일 리스트
+        filePath = os.path.dirname(os.path.realpath(__file__))     #현재 파일의 폴더 경로; 작업 파일 기준
 
-        #현재 파일의 폴더 경로; 작업 파일 기준
-        path2 = os.path.dirname(os.path.realpath(__file__))
 
-        #디렉토리 파일 리스트
-        fileList = os.listdir(os.getcwd())
+        #다운로드 경로 지정
+        options.add_experimental_option(
+            'prefs',
+            {
+                'download.default_directory' : filePath + '\\pickles'
+            }
+        ) 
 
-        options.add_experimental_option('prefs', {"download.default_directory":path2+'\\pickles'})
         browser = webdriver.Chrome('./chromedriver', options=options)
         browser.get('http://114.199.29.251:8000/myinput')
-
         startDay, endDay = self.getDate()
+
         browser.find_element(By.NAME, 'startDay').send_keys(startDay)
         browser.find_element(By.NAME, 'endDay').send_keys(endDay)
-        
-        browser.find_element(By.NAME, 'sp').send_keys('None')
-        
+        browser.find_element(By.NAME, 'sp').send_keys(sp)
         dictList = json.dumps(macroFrame.selected)
         browser.find_element(By.NAME, 'dictList').send_keys(dictList)
-        
         browser.find_element(By.ID, 'submit').click()
 
-        time.sleep(2)
-
+        time.sleep(5)
         browser.find_element(By.ID, 'down').click()
-
-        time.sleep(2)
+        time.sleep(5)
 
         browser.quit()
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -380,66 +380,62 @@ class macroFrame(tk.Frame):
 
 
 
+
+
+
+
+
+
+
+
+
+
     def printData(self):
         _dfSum = open(self.picklePath.get(), 'rb')
         dfSum = pickle.load(_dfSum)
-        print(dfSum)
         
         # # 기능 선택
-        # for item in self.functionList:
-        #     if item['name'] == self.functioinCombo.get():
-        #         selectedCombo = item['param']
-        #         break
+        for item in self.functionList:
+            if item['name'] == self.functioinCombo.get():
+                selectedCombo = item['param']
+                break
+
+        #엑셀파일로 저장되는 기능은 파일경로 요청
+        dir = None
+        if selectedCombo == 'cor':
+            dir = filedialog.asksaveasfile(mode='w', defaultextension=".xlsx")
+            if dir == None:
+                return
+
+        # print(dfSum)
+
+        if selectedCombo == 'graph':
+            createGraph(dfSum, 'nomal')
+
+        elif selectedCombo == 'ccr':
+            createGraph(dfSum, 'ccr')
+
+        elif selectedCombo == 'histo':
+            createGraph(dfSum, 'histogram')
+
+        elif selectedCombo == 'ma':
+            createGraph(dfSum, 'ma')
+
+        elif selectedCombo == 'band':
+            createGraph(dfSum, 'band')
+
+        elif selectedCombo == 'cor':
+            createExcel(dfSum, dir.name, 'cor')
 
 
-        # #엑셀파일로 저장되는 기능은 파일경로 요청
-        # dir = None
-        # if selectedCombo == 'cor':
-        #     dir = filedialog.asksaveasfile(mode='w', defaultextension=".xlsx")
-        #     if dir == None:
-        #         return
 
-#         start, end = self.getDate()
 
-#         paramToServer = {
-#             'dictList': macroFrame.selected,
-#             'sp' : sp,
-#             'startDay':start.strftime('%Y%m%d'),
-#             'endDay':end.strftime('%Y%m%d')
-#         }
-# # #####################################################################################################################################################
-#         url = "http://114.199.29.251:8000/input"
-#         # url = "http://127.0.0.1:8000/test"
-        
-#         _res = requests.post(url, data=json.dumps(paramToServer), verify=False)
-#         res = json.loads(_res.content)
-#         newIndex = [datetime.strptime(index, '%Y-%m-%d') for index in res['index']]
-#         # print(newIndex)
 
-#         dfSum = pd.DataFrame(
-#             res['data'],
-#             columns = res['columns'],
-#             index = newIndex
-#         )
-#         # print(dfSum)
 
-#         if selectedCombo == 'graph':
-#             createGraph(dfSum, 'nomal')
 
-#         elif selectedCombo == 'ccr':
-#             createGraph(dfSum, 'ccr')
 
-#         elif selectedCombo == 'histo':
-#             createGraph(dfSum, 'histogram')
 
-#         elif selectedCombo == 'ma':
-#             createGraph(dfSum, 'ma')
 
-#         elif selectedCombo == 'band':
-#             createGraph(dfSum, 'band')
-
-#         elif selectedCombo == 'cor':
-#             createExcel(dfSum, dir.name, 'cor')
 
 
 
@@ -479,8 +475,8 @@ class macroFrame(tk.Frame):
             dict['changeRate'] = False
         elif widget == 'krx':
             code = self.e.get()
-            name = stock.get_market_ticker_name(code)
-            dict = {'source':'krx', 'name':name, 'code':code, 'changeRate':False}
+            # name = stock.get_market_ticker_name(code)
+            dict = {'source':'krx', 'name':code, 'code':code, 'changeRate':False}
         
         macroFrame.selected.append(dict)
 
