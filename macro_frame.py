@@ -281,6 +281,7 @@ class macroFrame(tk.Frame):
         self.spCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.spList], state='readonly')
         self.spCombo.current(0)
         self.spCombo.grid(row=0, column=0)
+       
         # 서버에서 가져오기 버튼
         self.btnRun = tk.Button(self.inputFrame, text='가져오기', command=lambda:self.getData())
         self.btnRun.grid(row=0, column=1, padx=5)
@@ -294,6 +295,7 @@ class macroFrame(tk.Frame):
         # 출력하기 버튼
         self.btnRun = tk.Button(self.inputFrame, text='출력', command=lambda:self.printData())
         self.btnRun.grid(row=2, column=1, padx=5)
+        
         # 출력기능 콤보
         self.functionList = [
             {'name':'그래프출력', 'param':'graph'},
@@ -365,9 +367,9 @@ class macroFrame(tk.Frame):
         browser.find_element(By.NAME, 'dictList').send_keys(dictList)
         browser.find_element(By.ID, 'submit').click()
 
-        time.sleep(5)
+        time.sleep(3)
         browser.find_element(By.ID, 'down').click()
-        time.sleep(5)
+        time.sleep(3)
 
         browser.quit()
 
@@ -477,22 +479,15 @@ class macroFrame(tk.Frame):
             dict = copy.deepcopy(self.fredList[index])
             dict['changeRate'] = False
         elif widget == 'krx':
-            
-            
             code = self.e.get()
-            
             if not(code):
                 print('코드를 입력하세요')
                 return False
-            
             mode = []
-
             for key, val in self.krx_check_dic.items():
                 if val.get():
                     mode.append(key)    
-            
             dict = {'source':'krx', 'name':code, 'code':code, 'changeRate':False, 'mode':mode}
-        
         macroFrame.selected.append(dict)
 
         self.updateTree()
