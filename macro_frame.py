@@ -148,10 +148,10 @@ class macroFrame(tk.Frame):
                 })
 
         # ecos 스크롤바
-        self.ecosScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.ecosSelect.config(yscrollcommand=self.ecosScroll.set)
-        self.ecosScroll.config(command=self.ecosSelect.yview)
-        self.ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
+        ecosScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.ecosSelect.config(yscrollcommand=ecosScroll.set)
+        ecosScroll.config(command=self.ecosSelect.yview)
+        ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
 
         #ecos 리스트박스 이벤트 연결 및 배치
         self.ecosSelect.bind('<Double-Button-1>', lambda event:self.addToTreeview(event, 'ecos'))
@@ -180,10 +180,10 @@ class macroFrame(tk.Frame):
                 })
 
         # yf 스크롤바
-        self.yfScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.yfSelect.config(yscrollcommand=self.yfScroll.set)
-        self.yfScroll.config(command=self.yfSelect.yview)
-        self.yfScroll.grid(row=1, column=3, sticky=tk.N + tk.S + tk.W)
+        yfScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.yfSelect.config(yscrollcommand=yfScroll.set)
+        yfScroll.config(command=self.yfSelect.yview)
+        yfScroll.grid(row=1, column=3, sticky=tk.N + tk.S + tk.W)
 
         #yf 리스트박스 이벤트 연결 및 배치
         self.yfSelect.grid(row=1, column=2, sticky=tk.N + tk.E)
@@ -213,10 +213,10 @@ class macroFrame(tk.Frame):
                 })
 
         # fred 스크롤바
-        self.fredScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.fredSelect.config(yscrollcommand=self.fredScroll.set)
-        self.fredScroll.config(command=self.fredSelect.yview)
-        self.fredScroll.grid(row=1, column=5, sticky=tk.N + tk.S + tk.W)
+        fredScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.fredSelect.config(yscrollcommand=fredScroll.set)
+        fredScroll.config(command=self.fredSelect.yview)
+        fredScroll.grid(row=1, column=5, sticky=tk.N + tk.S + tk.W)
 
         #fred 리스트박스 이벤트 연결 및 배치
         self.fredSelect.grid(row=1, column=4, sticky=tk.N)
