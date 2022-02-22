@@ -1,5 +1,3 @@
-from multiprocessing import Event
-from django.template import Variable
 from macro_print import *
 
 import tkinter as tk
@@ -238,26 +236,27 @@ class macroFrame(tk.Frame):
         self.e.grid(row=1, column=0, sticky=tk.N)
 
         #  BPS, PER, PBR, EPS, DIV, DPS
-        self.krx_check_dic = {'price':tk.IntVar(), 'bps':tk.IntVar(), 'per':tk.IntVar(), 'pbr':tk.IntVar(), 'eps':tk.IntVar(), 'div':tk.IntVar(), 'dps':tk.IntVar()}
+        self.krx_check_dic = {'PRICE':tk.IntVar(), 'BPS':tk.IntVar(), 'PER':tk.IntVar(), 'PBR':tk.IntVar(), 'EPS':tk.IntVar(), 'DIV':tk.IntVar(), 'DPS':tk.IntVar()}
         
-        priceCheck = Checkbutton(self.krxFrame, text='price', variable=self.krx_check_dic['price'])
+        priceCheck = Checkbutton(self.krxFrame, text='PRICE', variable=self.krx_check_dic['PRICE'])
         priceCheck.grid(row=2, column=0)
-        bpsCheck = Checkbutton(self.krxFrame, text='bps', variable=self.krx_check_dic['bps'])
+        bpsCheck = Checkbutton(self.krxFrame, text='BPS', variable=self.krx_check_dic['BPS'])
         bpsCheck.grid(row=3, column=0)
-        perCheck = Checkbutton(self.krxFrame, text='per', variable=self.krx_check_dic['per'])
+        perCheck = Checkbutton(self.krxFrame, text='PER', variable=self.krx_check_dic['PER'])
         perCheck.grid(row=4, column=0)
-        perCheck = Checkbutton(self.krxFrame, text='pbr', variable=self.krx_check_dic['pbr'])
+        perCheck = Checkbutton(self.krxFrame, text='PBR', variable=self.krx_check_dic['PBR'])
         perCheck.grid(row=5, column=0)
-        perCheck = Checkbutton(self.krxFrame, text='eps', variable=self.krx_check_dic['eps'])
+        perCheck = Checkbutton(self.krxFrame, text='EPS', variable=self.krx_check_dic['EPS'])
         perCheck.grid(row=6, column=0)
-        perCheck = Checkbutton(self.krxFrame, text='div', variable=self.krx_check_dic['div'])
+        perCheck = Checkbutton(self.krxFrame, text='DIV', variable=self.krx_check_dic['DIV'])
         perCheck.grid(row=7, column=0)
-        perCheck = Checkbutton(self.krxFrame, text='dps', variable=self.krx_check_dic['dps'])
+        perCheck = Checkbutton(self.krxFrame, text='DPS', variable=self.krx_check_dic['DPS'])
         perCheck.grid(row=8, column=0)
         # self.krxBtn = tk.Button(self.krxFrame, text='목록에 추가', command=lambda event:self.addToTreeview(event, 'krx'))     # 이렇게하니 버튼 이벤트 안 됨.
         self.krxBtn = tk.Button(self.krxFrame, text='목록에 추가')
         self.krxBtn.bind('<Button-1>', lambda event:self.addToTreeview(event, 'krx'))
         self.krxBtn.grid(row=9, column=0)
+
 
 
 
