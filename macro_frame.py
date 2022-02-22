@@ -3,18 +3,15 @@ from macro_print import *
 import tkinter as tk
 from tkinter import Scrollbar, ttk
 import tkinter.messagebox as msgbox
-import tkinter.ttk as myCombo
+import tkinter.ttk as tkCombo
 from tkinter.constants import ANCHOR
 
-
 import calendar
-from datetime import datetime, date
-# from datetime import date, datetime
+from datetime import date
+
 from tkinter import filedialog
-import pandas as pd
 
 import copy
-import requests
 import json
 
 today = date.today() #날짜 값만 필요
@@ -47,13 +44,18 @@ class macroFrame(tk.Frame):
 
         super().__init__()
 
+
+
+
+
+
         #선택된 지표 트리뷰
         self.selectedTree = ttk.Treeview(self, column=('c0', 'c1'), show='headings', height=30)
         self.selectedTree.heading('c0', text='이름')
         self.selectedTree.column('c0', width=200, anchor=tk.CENTER)
         self.selectedTree.heading('c1', text='변화율?')
         self.selectedTree.column('c1', width=200, anchor=tk.CENTER)
-        self.selectedTree.grid(row=0, column=0, rowspan=7)
+        self.selectedTree.grid(row=0, column=0, rowspan=3)
         self.selectedTree.bind('<Button-3>', lambda event:self.rightClickEvent(event))
 
 
@@ -64,49 +66,68 @@ class macroFrame(tk.Frame):
         self.m.add_command(label ='순서 변경', command=lambda:self.changePosition())
 
 
-        # 시작일        
-        yearList = [str(i)+'년' for i in range(1980, today.year+1)]
-        self.startYearCombo = myCombo.Combobox(self, height=0, values=yearList, state='readonly')
+
+
+
+
+
+
+
+
+        # 날짜 입력 프레임
+        self.dateFrame = tk.Frame(self)
+        self.dateFrame.grid(row=0, column=1, padx=5)
+
+        #시작일
+        yearList = [str(i)+'년' for i in range(1980, today.year+1)]     
+        self.startYearCombo = tkCombo.Combobox(self.dateFrame, height=0, values=yearList, state='readonly')
         self.startYearCombo.current(len(yearList)-1)
-        self.startYearCombo.grid(row=0, column=1, padx= 5)
+        self.startYearCombo.grid(row=0, column=0, padx= 5)
 
         monthList = [str(i)+'월' for i in range(1, 13)]
-        self.startMonthCombo = myCombo.Combobox(self, height=0, values=monthList, state='readonly')
+        self.startMonthCombo = tkCombo.Combobox(self.dateFrame, height=0, values=monthList, state='readonly')
         self.startMonthCombo.current(today.month-1)
         self.startMonthCombo.bind("<<ComboboxSelected>>", lambda event : self.selectDate(event, 'startMonth'))
-        self.startMonthCombo.grid(row=0, column=3, padx= 5)
+        self.startMonthCombo.grid(row=0, column=1, padx= 5)
 
-        self.startDayCombo = myCombo.Combobox(self, height=0)
         self.startDayValue = [str(i)+'일' for i in range(1, lastDay+1)]
-        self.startDayCombo = myCombo.Combobox(self, height=0, values=self.startDayValue, state='readonly')
+        self.startDayCombo = tkCombo.Combobox(self.dateFrame, height=0, values=self.startDayValue, state='readonly')
         self.startDayCombo.current(0)
-        self.startDayCombo.grid(row=0, column=5, padx= 5)
+        self.startDayCombo.grid(row=0, column=2, padx= 5)
         
-        tk.Label(self, text='에서').grid(row=0, column=6, padx= 5, sticky=tk.W)
+        tk.Label(self.dateFrame, text='에서').grid(row=0, column=3, padx= 5, sticky=tk.W)
 
-
-        # 종료일
-        self.endYearCombo = myCombo.Combobox(self, height=0, values=yearList, state='readonly')
+        #종료일
+        self.endYearCombo = tkCombo.Combobox(self.dateFrame, height=0, values=yearList, state='readonly')
         self.endYearCombo.current(len(yearList)-1)
-        self.endYearCombo.grid(row=1, column=1, padx= 5)
+        self.endYearCombo.grid(row=1, column=0, padx= 5)
 
-        self.endMonthCombo = myCombo.Combobox(self, height=0, values=monthList, state='readonly')
+        self.endMonthCombo = tkCombo.Combobox(self.dateFrame, height=0, values=monthList, state='readonly')
         self.endMonthCombo.current(today.month-1)
         self.endMonthCombo.bind("<<ComboboxSelected>>", lambda event:self.selectDate(event, 'endMonth'))
-        self.endMonthCombo.grid(row=1, column=3, padx= 5)
+        self.endMonthCombo.grid(row=1, column=1, padx= 5)
 
         self.endDayValue = [str(i)+'일' for i in range(1, lastDay+1)]
-        self.endDayCombo = myCombo.Combobox(self, height=0, values=self.endDayValue, state='readonly')
+        self.endDayCombo = tkCombo.Combobox(self.dateFrame, height=0, values=self.endDayValue, state='readonly')
         self.endDayCombo.current(today.day-1)
-        self.endDayCombo.grid(row=1, column=5, padx= 5)
+        self.endDayCombo.grid(row=1, column=2, padx= 5)
 
-        tk.Label(self, text='까지').grid(row=1, column=6, padx= 5, sticky=tk.W)
+        tk.Label(self.dateFrame, text='까지').grid(row=1, column=3, padx= 5, sticky=tk.W)
 
+
+
+
+
+
+
+        # 리스트 프레임
+        self.listFrame = tk.Frame(self)
+        self.listFrame.grid(row=1, column=1, padx=5)
 
         # ecos 리스트박스
-        tk.Label(self, text='한국은행에서').grid(row=2, column=1)
+        tk.Label(self.listFrame, text='한국은행에서').grid(row=0, column=0)
 
-        self.ecosSelect = tk.Listbox(self, selectmode='single', height=20)
+        self.ecosSelect = tk.Listbox(self.listFrame, selectmode='single', height=20)
         self.ecosList = []
         con = sqlite3.connect('./db/myDb.db')
         with con:
@@ -130,19 +151,19 @@ class macroFrame(tk.Frame):
                 })
 
         # ecos 스크롤바
-        self.ecosScroll = Scrollbar(self, orient='vertical')
+        self.ecosScroll = Scrollbar(self.listFrame, orient='vertical')
         self.ecosSelect.config(yscrollcommand=self.ecosScroll.set)
         self.ecosScroll.config(command=self.ecosSelect.yview)
-        self.ecosScroll.grid(row=3, column=2, sticky=tk.N + tk.S + tk.W)
+        self.ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
 
         #ecos 리스트박스 이벤트 연결 및 배치
         self.ecosSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'ecos'))
-        self.ecosSelect.grid(row=3, column=1, sticky=tk.N + tk.E)
+        self.ecosSelect.grid(row=1, column=0, sticky=tk.N + tk.E)
 
 
         # yf 리스트 박스
-        tk.Label(self, text='야후파이낸스에서').grid(row=2, column=3)
-        self.yfSelect = tk.Listbox(self, selectmode='single', height=20)
+        tk.Label(self.listFrame, text='야후파이낸스에서').grid(row=0, column=2)
+        self.yfSelect = tk.Listbox(self.listFrame, selectmode='single', height=20)
         self.yfList = []
         with con:
             sqlite3.Connection
@@ -159,19 +180,19 @@ class macroFrame(tk.Frame):
                 })
 
         # yf 스크롤바
-        self.yfScroll = Scrollbar(self, orient='vertical')
+        self.yfScroll = Scrollbar(self.listFrame, orient='vertical')
         self.yfSelect.config(yscrollcommand=self.yfScroll.set)
         self.yfScroll.config(command=self.yfSelect.yview)
-        self.yfScroll.grid(row=3, column=4, sticky=tk.N + tk.S + tk.W)
+        self.yfScroll.grid(row=1, column=3, sticky=tk.N + tk.S + tk.W)
 
         #yf 리스트박스 이벤트 연결 및 배치
-        self.yfSelect.grid(row=3, column=3, sticky=tk.N + tk.E)
+        self.yfSelect.grid(row=1, column=2, sticky=tk.N + tk.E)
         self.yfSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'yf'))
 
 
         # fred 리스트 박스
-        tk.Label(self, text='fred에서').grid(row=2, column=5)
-        self.fredSelect = tk.Listbox(self, selectmode='single', height=20)
+        tk.Label(self.listFrame, text='fred에서').grid(row=0, column=4)
+        self.fredSelect = tk.Listbox(self.listFrame, selectmode='single', height=20)
         self.fredList = []
         with con:
             sqlite3.Connection
@@ -190,44 +211,34 @@ class macroFrame(tk.Frame):
 
 
         # fred 스크롤바
-        self.fredScroll = Scrollbar(self, orient='vertical')
+        self.fredScroll = Scrollbar(self.listFrame, orient='vertical')
         self.fredSelect.config(yscrollcommand=self.fredScroll.set)
         self.fredScroll.config(command=self.fredSelect.yview)
-        self.fredScroll.grid(row=3, column=6, sticky=tk.N + tk.S + tk.W)
+        self.fredScroll.grid(row=1, column=5, sticky=tk.N + tk.S + tk.W)
 
         #fred 리스트박스 이벤트 연결 및 배치
-        self.fredSelect.grid(row=3, column=5, sticky=tk.N)
+        self.fredSelect.grid(row=1, column=4, sticky=tk.N)
         self.fredSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'fred'))
 
 
         # krx 개별종목 코드입력
-        tk.Label(self, text='krx에서\n(종목코드입력)').grid(row=2, column=7)
-        self.e= tk.Entry(self, width=20)
-        self.e.grid(row=3, column=7, sticky=tk.N)
+        tk.Label(self.listFrame, text='krx에서\n(종목코드입력)').grid(row=0, column=6)
+        self.e= tk.Entry(self.listFrame, width=20)
+        self.e.grid(row=1, column=6, sticky=tk.N)
         self.e.bind('<Return>',  lambda event:self.doubleClickEvent(event, 'krx'))
 
 
-        # # 내 목록 가져오기
-        # btnSaveList = tk.Button(self, text='리스트 저장하기', command=lambda:self.myList('save'))
-        # btnSaveList.grid(row=4, column=1)
-
-        # btnLoadList  = tk.Button(self, text='리스트 가져오기', command=lambda:self.myList('load'))
-        # btnLoadList.grid(row=4, column=3)
-        
-        # btnDelList  = tk.Button(self, text='리스트 삭제', command=lambda:self.myList('del'))
-        # btnDelList.grid(row=4, column=5)
-
-        # # btnClearList  = tk.Button(self, text='리스트 테이블 드랍', command=lambda:self.myList('clear'))
-        # # btnClearList.grid(row=4, column=4)
 
 
 
 
 
-        # 저장버튼
-        btnRun = tk.Button(self, text='가져오기', command=lambda:self.getData())
-        btnRun.grid(row=4, column=3, padx=1, pady=1)
 
+
+
+        # 입력 프레임
+        self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(row=2, column=1)
 
         # 기준 주기 콤보
         self.spList = [
@@ -236,29 +247,22 @@ class macroFrame(tk.Frame):
             {'name':'MM(월)', 'sp':'MM'},
             {'name':'DD(일)', 'sp':'DD'},
         ]
-        self.spCombo = myCombo.Combobox(self, height=0, width=20, values=[item['name'] for item in self.spList], state='readonly')
+        self.spCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.spList], state='readonly')
         self.spCombo.current(0)
-        self.spCombo.grid(row=4, column=1, columnspan=2)
-
-
-
-
+        self.spCombo.grid(row=0, column=0)
+        # 서버에서 가져오기 버튼
+        self.btnRun = tk.Button(self.inputFrame, text='가져오기', command=lambda:self.getData())
+        self.btnRun.grid(row=0, column=1, padx=5)
 
         # 불러오기 버튼
-        btnRun = tk.Button(self, text='불러오기', command=lambda:self.loadData())
-        btnRun.grid(row=5, column=3, padx=1, pady=1)
-
-        self.picklePath = tk.Entry(self, width=20)
-        self.picklePath.grid(row=5, column=1, columnspan=2)
-
-
-
+        self.btnRun = tk.Button(self.inputFrame, text='불러오기', command=lambda:self.loadData())
+        self.btnRun.grid(row=1, column=1, pady=10)
+        self.picklePath = tk.Entry(self.inputFrame, width=50)
+        self.picklePath.grid(row=1, column=0, padx=5, pady=20)
 
         # 출력하기 버튼
-        btnRun = tk.Button(self, text='출력', command=lambda:self.printData())
-        btnRun.grid(row=6, column=3, padx=1, pady=1)
-
-
+        self.btnRun = tk.Button(self.inputFrame, text='출력', command=lambda:self.printData())
+        self.btnRun.grid(row=2, column=1, padx=5)
         # 출력기능 콤보
         self.functionList = [
             {'name':'그래프출력', 'param':'graph'},
@@ -268,10 +272,10 @@ class macroFrame(tk.Frame):
             {'name':'이동평균분석', 'param':'ma'},
             {'name':'볼린저밴드', 'param':'band'},
         ]
-        self.functioinCombo = myCombo.Combobox(self, height=0, width=20, values=[item['name'] for item in self.functionList], state='readonly')
+        self.functioinCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.functionList], state='readonly')
         self.functioinCombo.current(0)
-        self.functioinCombo.grid(row=6, column=1, columnspan=2)
-
+        self.functioinCombo.grid(row=2, column=0)
+        
 
 
 
@@ -560,39 +564,7 @@ class macroFrame(tk.Frame):
 
 
 
-    # def myList(self, param):
-        
-    #     with con:
-    #         cursor = con.cursor()
-    #         if param == 'save':
-    #             cursor.execute('delete from my_list')
-    #             con.commit()
-    #             for item in macroFrame.selected:
-    #                 sql = 'INSERT INTO my_list (dict) values(?)'
-    #                 _item = json.dumps(item)
-    #                 cursor.execute( sql, [(_item)])
-    #                 con.commit()
 
-    #         elif param == 'load':
-    #             sql = 'SELECT * FROM my_list'
-    #             cursor.execute(sql)
-    #             results = cursor.fetchall()
-    #             selectedLoaded = []
-    #             for result in results:
-    #                 selectedLoaded.append(json.loads(result[1]))
-    #             macroFrame.selected = selectedLoaded
-    #             self.updateTree()
-                    
-    #         elif param == 'del':
-    #             sql = 'delete from my_list'
-    #             cursor.execute(sql)
-    #             con.commit()
-    #             print('my_list 모든 row 삭제됨')
-
-    #         elif param == 'clear':
-    #             cursor.execute('DROP TABLE my_list')
-    #             con.commit()
-    #             print('my_list 테이블 드롭됨')
 
                     
 
@@ -632,12 +604,9 @@ class macroFrame(tk.Frame):
 
 
 
-
-
-
-
 # 테스트 바로 실행
 if __name__ == '__main__':
     root = tk.Tk()
-    macroFrame().pack()
+    # macroFrame().pack()
+    macroFrame().grid()
     root.mainloop()

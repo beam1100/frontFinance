@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['macro_frame.py'],
-             pathex=['c:\\Tkinter_frontEnd'],
+             pathex=['c:\\frontFinance'],
              binaries=[],
              datas=[],
              hiddenimports=[],
