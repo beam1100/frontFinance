@@ -1,5 +1,3 @@
-from multiprocessing import Event
-from django.template import Variable
 from macro_print import *
 
 import tkinter as tk
@@ -237,8 +235,7 @@ class macroFrame(tk.Frame):
         self.e= tk.Entry(self.krxFrame, width=20)
         self.e.grid(row=1, column=0, sticky=tk.N)
 
-        #  BPS, PER, PBR, EPS, DIV, DPS
-        self.krx_check_dic = {'price':tk.IntVar(), 'bps':tk.IntVar(), 'per':tk.IntVar(), 'pbr':tk.IntVar(), 'eps':tk.IntVar(), 'div':tk.IntVar(), 'dps':tk.IntVar()}
+                self.krx_check_dic = {'price':tk.IntVar(), 'bps':tk.IntVar(), 'per':tk.IntVar(), 'pbr':tk.IntVar(), 'eps':tk.IntVar(), 'div':tk.IntVar(), 'dps':tk.IntVar()}
         
         priceCheck = Checkbutton(self.krxFrame, text='price', variable=self.krx_check_dic['price'])
         priceCheck.grid(row=2, column=0)
