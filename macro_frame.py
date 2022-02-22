@@ -1,7 +1,9 @@
+from multiprocessing import Event
+from django.template import Variable
 from macro_print import *
 
 import tkinter as tk
-from tkinter import Scrollbar, ttk
+from tkinter import Checkbutton, Scrollbar, ttk
 import tkinter.messagebox as msgbox
 import tkinter.ttk as tkCombo
 from tkinter.constants import ANCHOR
@@ -44,10 +46,7 @@ class macroFrame(tk.Frame):
 
         super().__init__()
 
-
-
-
-
+################################################################################################################################################################################################################
 
         #선택된 지표 트리뷰
         self.selectedTree = ttk.Treeview(self, column=('c0', 'c1'), show='headings', height=30)
@@ -69,7 +68,7 @@ class macroFrame(tk.Frame):
 
 
 
-
+################################################################################################################################################################################################################
 
 
 
@@ -116,7 +115,7 @@ class macroFrame(tk.Frame):
 
 
 
-
+################################################################################################################################################################################################################
 
 
 
@@ -157,8 +156,11 @@ class macroFrame(tk.Frame):
         self.ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
 
         #ecos 리스트박스 이벤트 연결 및 배치
-        self.ecosSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'ecos'))
+        self.ecosSelect.bind('<Double-Button-1>', lambda event:self.addToTreeview(event, 'ecos'))
         self.ecosSelect.grid(row=1, column=0, sticky=tk.N + tk.E)
+
+
+
 
 
         # yf 리스트 박스
@@ -187,7 +189,10 @@ class macroFrame(tk.Frame):
 
         #yf 리스트박스 이벤트 연결 및 배치
         self.yfSelect.grid(row=1, column=2, sticky=tk.N + tk.E)
-        self.yfSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'yf'))
+        self.yfSelect.bind('<Double-Button-1>', lambda event:self.addToTreeview(event, 'yf'))
+
+
+
 
 
         # fred 리스트 박스
@@ -209,7 +214,6 @@ class macroFrame(tk.Frame):
                     'period':row[3]
                 })
 
-
         # fred 스크롤바
         self.fredScroll = Scrollbar(self.listFrame, orient='vertical')
         self.fredSelect.config(yscrollcommand=self.fredScroll.set)
@@ -218,19 +222,47 @@ class macroFrame(tk.Frame):
 
         #fred 리스트박스 이벤트 연결 및 배치
         self.fredSelect.grid(row=1, column=4, sticky=tk.N)
-        self.fredSelect.bind('<Double-Button-1>', lambda event:self.doubleClickEvent(event, 'fred'))
+        self.fredSelect.bind('<Double-Button-1>', lambda event:self.addToTreeview(event, 'fred'))
 
+
+
+
+
+        # krx 프레임
+        self.krxFrame = tk.Frame(self.listFrame)
+        self.krxFrame.grid(row=0, column=6, rowspan=2, sticky=tk.N)
 
         # krx 개별종목 코드입력
-        tk.Label(self.listFrame, text='krx에서\n(종목코드입력)').grid(row=0, column=6)
-        self.e= tk.Entry(self.listFrame, width=20)
-        self.e.grid(row=1, column=6, sticky=tk.N)
-        self.e.bind('<Return>',  lambda event:self.doubleClickEvent(event, 'krx'))
+        tk.Label(self.krxFrame, text='krx에서\n').grid(row=0, column=0)
+        self.e= tk.Entry(self.krxFrame, width=20)
+        self.e.grid(row=1, column=0, sticky=tk.N)
+
+        #  BPS, PER, PBR, EPS, DIV, DPS
+        self.krx_check_dic = {'price':tk.IntVar(), 'bps':tk.IntVar(), 'per':tk.IntVar(), 'pbr':tk.IntVar(), 'eps':tk.IntVar(), 'div':tk.IntVar(), 'dps':tk.IntVar()}
+        
+        priceCheck = Checkbutton(self.krxFrame, text='price', variable=self.krx_check_dic['price'])
+        priceCheck.grid(row=2, column=0)
+        bpsCheck = Checkbutton(self.krxFrame, text='bps', variable=self.krx_check_dic['bps'])
+        bpsCheck.grid(row=3, column=0)
+        perCheck = Checkbutton(self.krxFrame, text='per', variable=self.krx_check_dic['per'])
+        perCheck.grid(row=4, column=0)
+        perCheck = Checkbutton(self.krxFrame, text='pbr', variable=self.krx_check_dic['pbr'])
+        perCheck.grid(row=5, column=0)
+        perCheck = Checkbutton(self.krxFrame, text='eps', variable=self.krx_check_dic['eps'])
+        perCheck.grid(row=6, column=0)
+        perCheck = Checkbutton(self.krxFrame, text='div', variable=self.krx_check_dic['div'])
+        perCheck.grid(row=7, column=0)
+        perCheck = Checkbutton(self.krxFrame, text='dps', variable=self.krx_check_dic['dps'])
+        perCheck.grid(row=8, column=0)
+        # self.krxBtn = tk.Button(self.krxFrame, text='목록에 추가', command=lambda event:self.addToTreeview(event, 'krx'))     # 이렇게하니 버튼 이벤트 안 됨.
+        self.krxBtn = tk.Button(self.krxFrame, text='목록에 추가')
+        self.krxBtn.bind('<Button-1>', lambda event:self.addToTreeview(event, 'krx'))
+        self.krxBtn.grid(row=9, column=0)
 
 
 
 
-
+################################################################################################################################################################################################################
 
 
 
@@ -275,22 +307,12 @@ class macroFrame(tk.Frame):
         self.functioinCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.functionList], state='readonly')
         self.functioinCombo.current(0)
         self.functioinCombo.grid(row=2, column=0)
-        
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+################################################################################################################################################################################################################
 
 
 
@@ -354,16 +376,7 @@ class macroFrame(tk.Frame):
 
 
 
-
-
-
-
-
-
-
-
-
-
+################################################################################################################################################################################################################
 
 
 
@@ -380,16 +393,7 @@ class macroFrame(tk.Frame):
 
 
 
-
-
-
-
-
-
-
-
-
-
+################################################################################################################################################################################################################
 
 
 
@@ -435,16 +439,7 @@ class macroFrame(tk.Frame):
 
 
 
-
-
-
-
-
-
-
-
-
-
+################################################################################################################################################################################################################
 
 
 
@@ -463,8 +458,13 @@ class macroFrame(tk.Frame):
 
 
 
+################################################################################################################################################################################################################
 
-    def doubleClickEvent(self, event, widget):
+
+
+
+
+    def addToTreeview(self, event, widget):
         if widget == 'ecos':
             index = self.ecosSelect.curselection()[0]
             dict = copy.deepcopy(self.ecosList[index]) #얕은 복사는 참조하기 때문에, 깊은 복사 필요
@@ -478,13 +478,30 @@ class macroFrame(tk.Frame):
             dict = copy.deepcopy(self.fredList[index])
             dict['changeRate'] = False
         elif widget == 'krx':
+            
+            
             code = self.e.get()
-            # name = stock.get_market_ticker_name(code)
-            dict = {'source':'krx', 'name':code, 'code':code, 'changeRate':False}
+            
+            if not(code):
+                print('코드를 입력하세요')
+                return False
+            
+            mode = []
+
+            for key, val in self.krx_check_dic.items():
+                if val.get():
+                    mode.append(key)    
+            
+            dict = {'source':'krx', 'name':code, 'code':code, 'changeRate':False, 'mode':mode}
         
         macroFrame.selected.append(dict)
 
         self.updateTree()
+
+
+
+
+################################################################################################################################################################################################################
 
 
 
@@ -502,6 +519,11 @@ class macroFrame(tk.Frame):
 
 
 
+################################################################################################################################################################################################################
+
+
+
+
 
     def toChangeRate(self):
         item = self.selectedTree.focus()
@@ -509,6 +531,11 @@ class macroFrame(tk.Frame):
         index = itemList.index(item)
         macroFrame.selected[index]['changeRate'] = not(macroFrame.selected[index]['changeRate'])
         self.updateTree()
+
+
+
+
+################################################################################################################################################################################################################
 
 
 
@@ -524,6 +551,11 @@ class macroFrame(tk.Frame):
         else:
             msgbox.showwarning('경고','두 개를 선택하세요')
         self.updateTree()
+
+
+
+
+################################################################################################################################################################################################################
 
 
 
@@ -564,15 +596,21 @@ class macroFrame(tk.Frame):
 
 
 
+################################################################################################################################################################################################################
 
 
-                    
 
 
 
     def rightClickEvent(self, event):
         self.m.tk_popup(event.x_root, event.y_root)
         self.m.grab_release()
+
+
+
+
+
+################################################################################################################################################################################################################
 
 
 
