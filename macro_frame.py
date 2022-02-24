@@ -29,6 +29,10 @@ with con:
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
+# from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.service import Service
+
 import os
 import pickle
 
@@ -148,10 +152,10 @@ class macroFrame(tk.Frame):
                 })
 
         # ecos 스크롤바
-        ecosScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.ecosSelect.config(yscrollcommand=ecosScroll.set)
-        ecosScroll.config(command=self.ecosSelect.yview)
-        ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
+        self.ecosScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.ecosSelect.config(yscrollcommand=self.ecosScroll.set)
+        self.ecosScroll.config(command=self.ecosSelect.yview)
+        self.ecosScroll.grid(row=1, column=1, sticky=tk.N + tk.S + tk.W)
 
         #ecos 리스트박스 이벤트 연결 및 배치
         self.ecosSelect.bind('<Double-Button-1>', lambda event:self.addToTreeview(event, 'ecos'))
@@ -180,10 +184,10 @@ class macroFrame(tk.Frame):
                 })
 
         # yf 스크롤바
-        yfScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.yfSelect.config(yscrollcommand=yfScroll.set)
-        yfScroll.config(command=self.yfSelect.yview)
-        yfScroll.grid(row=1, column=3, sticky=tk.N + tk.S + tk.W)
+        self.yfScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.yfSelect.config(yscrollcommand=self.yfScroll.set)
+        self.yfScroll.config(command=self.yfSelect.yview)
+        self.yfScroll.grid(row=1, column=3, sticky=tk.N + tk.S + tk.W)
 
         #yf 리스트박스 이벤트 연결 및 배치
         self.yfSelect.grid(row=1, column=2, sticky=tk.N + tk.E)
@@ -213,10 +217,10 @@ class macroFrame(tk.Frame):
                 })
 
         # fred 스크롤바
-        fredScroll = Scrollbar(self.listFrame, orient='vertical')
-        self.fredSelect.config(yscrollcommand=fredScroll.set)
-        fredScroll.config(command=self.fredSelect.yview)
-        fredScroll.grid(row=1, column=5, sticky=tk.N + tk.S + tk.W)
+        self.fredScroll = Scrollbar(self.listFrame, orient='vertical')
+        self.fredSelect.config(yscrollcommand=self.fredScroll.set)
+        self.fredScroll.config(command=self.fredSelect.yview)
+        self.fredScroll.grid(row=1, column=5, sticky=tk.N + tk.S + tk.W)
 
         #fred 리스트박스 이벤트 연결 및 배치
         self.fredSelect.grid(row=1, column=4, sticky=tk.N)
@@ -278,23 +282,26 @@ class macroFrame(tk.Frame):
             {'name':'MM(월)', 'sp':'MM'},
             {'name':'DD(일)', 'sp':'DD'},
         ]
-        self.spCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.spList], state='readonly')
+        self.spCombo = tkCombo.Combobox(self.inputFrame, height=0, width=25, values=[item['name'] for item in self.spList], state='readonly')
         self.spCombo.current(0)
         self.spCombo.grid(row=0, column=0)
+
+        #저장할 이름 입력
+        self.nameToSave = tk.Entry(self.inputFrame, width=25)
+        self.nameToSave.insert(0, "저장할 이름")
+        self.nameToSave.grid(row=0, column=1, padx=5)
        
         # 서버에서 가져오기 버튼
-        self.btnRun = tk.Button(self.inputFrame, text='가져오기', command=lambda:self.getData())
-        self.btnRun.grid(row=0, column=1, padx=5)
+        self.btnRun = tk.Button(self.inputFrame, text='요청하기', command=lambda:self.getData())
+        self.btnRun.grid(row=0, column=2, padx=5)
+
+        # 불러오기 경로
+        self.picklePath = tk.Entry(self.inputFrame, width=50)
+        self.picklePath.grid(row=1, column=0, columnspan=2, padx=5, pady=20)
 
         # 불러오기 버튼
         self.btnRun = tk.Button(self.inputFrame, text='불러오기', command=lambda:self.loadData())
-        self.btnRun.grid(row=1, column=1, pady=10)
-        self.picklePath = tk.Entry(self.inputFrame, width=50)
-        self.picklePath.grid(row=1, column=0, padx=5, pady=20)
-
-        # 출력하기 버튼
-        self.btnRun = tk.Button(self.inputFrame, text='출력', command=lambda:self.printData())
-        self.btnRun.grid(row=2, column=1, padx=5)
+        self.btnRun.grid(row=1, column=2, pady=10)
         
         # 출력기능 콤보
         self.functionList = [
@@ -307,7 +314,12 @@ class macroFrame(tk.Frame):
         ]
         self.functioinCombo = tkCombo.Combobox(self.inputFrame, height=0, width=50, values=[item['name'] for item in self.functionList], state='readonly')
         self.functioinCombo.current(0)
-        self.functioinCombo.grid(row=2, column=0)
+        self.functioinCombo.grid(row=2, column=0, columnspan=2)
+
+        # 출력하기 버튼
+        self.btnRun = tk.Button(self.inputFrame, text='출력', command=lambda:self.printData())
+        self.btnRun.grid(row=2, column=2, padx=5)
+
 
 
 
@@ -357,9 +369,10 @@ class macroFrame(tk.Frame):
         ) 
 
         browser = webdriver.Chrome('./chromedriver', options=options)
+        # browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         browser.get('http://114.199.29.251:8000/myinput')
         startDay, endDay = self.getDate()
-
+        browser.find_element(By.NAME, 'nameToSave').send_keys(self.nameToSave.get())
         browser.find_element(By.NAME, 'startDay').send_keys(startDay)
         browser.find_element(By.NAME, 'endDay').send_keys(endDay)
         browser.find_element(By.NAME, 'sp').send_keys(sp)
@@ -367,12 +380,13 @@ class macroFrame(tk.Frame):
         browser.find_element(By.NAME, 'dictList').send_keys(dictList)
         browser.find_element(By.ID, 'submit').click()
 
-        time.sleep(3)
-        browser.find_element(By.ID, 'down').click()
-        time.sleep(3)
+        browser.get('http://114.199.29.251:8000/myoutput')
+        
+        time.sleep(10)
 
-        browser.quit()
-
+        # browser.find_element(By.ID, 'down').click()
+        
+        # browser.quit()
 
 
 
