@@ -380,13 +380,12 @@ class macroFrame(tk.Frame):
         browser.find_element(By.NAME, 'dictList').send_keys(dictList)
         browser.find_element(By.ID, 'submit').click()
 
-        browser.get('http://114.199.29.251:8000/myoutput')
-        
-        time.sleep(10)
+        time.sleep(3)
+        browser.quit()
 
+        # browser.get('http://114.199.29.251:8000/myoutput')
         # browser.find_element(By.ID, 'down').click()
         
-        # browser.quit()
 
 
 
